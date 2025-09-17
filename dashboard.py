@@ -93,7 +93,7 @@ def cal_count(df_2024_common, df_2025_common):
     df_diff_count['diff_count'] = df_diff_count['2025_count'] - df_diff_count['2024_count']
     return df_diff_count
 
-def viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_count):
+def viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_count, df_diff_rate):
     # 서브플롯 생성 (2행 1열, 높이 비율 3:1)
     fig = make_subplots(
         rows=2, cols=1,
@@ -114,7 +114,14 @@ def viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_c
             mode='lines+markers',
             name='2024',
             line=dict(color='gray', dash='dash', width=3),
-            marker=dict(size=8)
+            marker=dict(size=8),
+            customdata=df_2024_common[['시작일', '종료일', '신규 활성 수업 수']].values,
+            hovertemplate=
+                "<b>2024년 %{x}주차</b><br>" +
+                "기간: %{customdata[0]} ~ %{customdata[1]}<br>" +
+                f"{selected_panel}: %{{y:.2f}}%<br>" +
+                "신규 활성 수업 수: %{customdata[2]}<br>" +
+                "<extra></extra>"
         ),
         row=1, col=1
     )
@@ -127,7 +134,17 @@ def viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_c
             mode='lines+markers',
             name='2025',
             line=dict(color='blue', width=3),
-            marker=dict(size=8)
+            marker=dict(size=8),
+            customdata=np.column_stack([
+                df_2025_common['시작일'].values, df_2025_common['종료일'].values,
+                df_diff_rate['diff_pp'].values
+            ]),
+            hovertemplate=
+                "<b>2025년 %{x}주차</b><br>" +
+                "기간: %{customdata[0]} ~ %{customdata[1]}<br>" +
+                f"{selected_panel}: %{{y:.2f}}%<br>" +
+                "2024년 대비: %{customdata[2]:+.2f}p.p.<br>" +
+                "<extra></extra>"
         ),
         row=1, col=1
     )
@@ -156,7 +173,6 @@ def viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_c
         align="right"
     )
 
-
     # 2025 (양수인 경우 - 초록색 표시)
     fig.add_trace(
         go.Scatter(
@@ -165,11 +181,18 @@ def viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_c
             mode='markers',
             marker=dict(size=10, color="blue"),
             name="2025 (양수)",
-            customdata=round(pos["diff_pp"],3),
+            customdata=np.column_stack([
+                pos['시작일'].values, 
+                pos['종료일'].values, 
+                pos['신규 활성 수업 수'].values, 
+                np.round(pos["diff_pp"].values, 2)
+            ]),
             hovertemplate=
-                "<b>%{x}주차</b><br>" +
-                "2025: %{y:.2f}%<br>" +
-                "<span style='color:red'>2024 대비: %{customdata:+.2f}p.p.</span>" +
+                "<b>2025년 %{x}주차</b><br>" +
+                "기간: %{customdata[0]} ~ %{customdata[1]}<br>" +
+                f"{selected_panel}: %{{y:.2f}}%<br>" +
+                "신규 활성 수업 수: %{customdata[2]}<br>" +
+                "<span style='color:red'>2024 대비: %{customdata[3]:+}p.p.</span>" +
                 "<extra></extra>"
         ),
         row=1, col=1
@@ -183,16 +206,22 @@ def viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_c
             mode='markers',
             marker=dict(size=10, color="blue"),
             name="2025 (음수)",
-            customdata=round(neg["diff_pp"],3),
+            customdata=np.column_stack([
+                neg['시작일'].values, 
+                neg['종료일'].values, 
+                neg['신규 활성 수업 수'].values, 
+                np.round(neg["diff_pp"].values, 2)
+            ]),
             hovertemplate=
-                "<b>%{x}주차</b><br>" +
-                "2025: %{y:.2f}%<br>" + 
-                "<span style='color:green'>2024 대비: %{customdata:+.2f}p.p.</span>" +
+                "<b>2025년 %{x}주차</b><br>" +
+                "기간: %{customdata[0]} ~ %{customdata[1]}<br>" +
+                f"{selected_panel}: %{{y:.2f}}%<br>" +
+                "신규 활성 수업 수: %{customdata[2]}<br>" +
+                "<span style='color:green'>2024 대비: %{customdata[3]:+}p.p.</span>" +
                 "<extra></extra>"
         ),
         row=1, col=1
     )
-
 
     # 두 번째 서브플롯: 신규 활성 수업 수 바 차트
     # 2024년 바
@@ -285,7 +314,7 @@ if not df.empty and panel_cos:
 
     # 시각화 생성
     st.subheader(f"📈 {selected_panel} 이탈률 분석")
-    fig = viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_count)
+    fig = viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_count, df_diff_rate)
     st.plotly_chart(fig, use_container_width=True)
     # 테이블 (2024 vs 2025 비교)
     st.subheader("📊 데이터 테이블 (2024 vs 2025 비교)")
