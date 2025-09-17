@@ -233,12 +233,19 @@ def viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_c
             name='2024 신규 활성 수업',
             marker_color='gray',
             opacity=0.6,
-            customdata=np.stack([df_diff_count['2025_count'], df_diff_count['diff_count']], axis=-1),
+            customdata=np.column_stack([
+                df_2024_common['시작일'].values,
+                df_2024_common['종료일'].values,
+                df_2025_common['시작일'].values,
+                df_2025_common['종료일'].values,
+                df_diff_count['2025_count'].values,
+                df_diff_count['diff_count'].values
+            ]),
             hovertemplate=
-                "<b>%{x}주차</b><br>" +
-                "2025년 수업 수: %{customdata[0]}<br>" +
-                "2024년 수업 수: %{y}<br>" +
-                "차이: %{customdata[1]:+d}<br>" +
+                "<b>%{x}주차 비교</b><br>" +
+                "2025년 (%{customdata[2]}~%{customdata[3]}): %{customdata[4]}개<br>" +
+                "2024년 (%{customdata[0]}~%{customdata[1]}): %{y}개<br>" +
+                "차이: %{customdata[5]:+d}개<br>" +
                 "<extra></extra>"
         ),
         row=2, col=1
@@ -252,12 +259,19 @@ def viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_c
             name='2025 신규 활성 수업',
             marker_color='blue',
             opacity=0.6,
-            customdata=np.stack([df_diff_count['2024_count'], df_diff_count['diff_count']], axis=-1),
+            customdata=np.column_stack([
+                df_2025_common['시작일'].values,
+                df_2025_common['종료일'].values,
+                df_2024_common['시작일'].values,
+                df_2024_common['종료일'].values,
+                df_diff_count['2024_count'].values,
+                df_diff_count['diff_count'].values
+            ]),
             hovertemplate=
-                "<b>%{x}주차</b><br>" +
-                "2025년 수업 수: %{y}<br>" +
-                "2024년 수업 수: %{customdata[0]}<br>" +
-                "차이: %{customdata[1]:+d}<br>" +
+                "<b>%{x}주차 비교</b><br>" +
+                "2025년 (%{customdata[0]}~%{customdata[1]}): %{y}개<br>" +
+                "2024년 (%{customdata[2]}~%{customdata[3]}): %{customdata[4]}개<br>" +
+                "차이: %{customdata[5]:+d}개<br>" +
                 "<extra></extra>"
         ),
         row=2, col=1
