@@ -72,7 +72,7 @@ st.markdown("""
 6. 🔄 **새로고침 버튼**으로 최신 데이터를 불러오세요 -> 데이터 연동 개발중..
 7. 구간 선택시 그래프가 이상하게 나온다면
 """
-st.image("logo.png", caption="서비스 로고", use_column_width=True)
+st.image("image.png", caption="서비스 로고", use_column_width=True)
 
 st.markdown("""
 ### 💡 분석 Tips
