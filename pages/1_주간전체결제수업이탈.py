@@ -328,7 +328,7 @@ if not df.empty and panel_cos:
     # 시각화 생성
     st.subheader(f"📈 {selected_panel} 이탈률 분석")
     fig = viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_count, df_diff_rate)
-    st.plotly_chart(fig, width=True)
+    st.plotly_chart(fig)
     # 테이블 (2024 vs 2025 비교)
     st.subheader("📊 데이터 테이블 (2024 vs 2025 비교)")
     
@@ -359,7 +359,7 @@ if not df.empty and panel_cos:
     # 차이 계산
     comparison_df['차이(p.p.)'] = df_diff_rate_reset['diff_pp']
     
-    st.dataframe(comparison_df, width=True)
+    st.dataframe(comparison_df)
     
 
 else:
@@ -374,3 +374,4 @@ if st.button("🔄 데이터 새로고침"):
     st.rerun()
 
        
+
