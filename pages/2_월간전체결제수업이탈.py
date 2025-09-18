@@ -5,15 +5,7 @@ import numpy as np
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-
-# 페이지 설정
-st.set_page_config(
-    page_title="월간 이탈률 분석 대시보드",
-    page_icon="📅",
-    layout="wide"
-)
-
-st.title("📅 월간 이탈률 분석 대시보드")
+from login import login, logout
 
 # Google Sheets 연동 함수
 @st.cache_data(ttl=300)  # 5분 캐시
@@ -328,6 +320,27 @@ def viz_rate(df_2024_common, df_2025_common, selected_panel, pos, neg, df_diff_c
 
     return fig
 
+# 페이지 설정
+st.set_page_config(
+    page_title="월간 이탈률 분석 대시보드",
+    page_icon="📅",
+    layout="wide"
+)
+
+
+# if login():
+#     st.sidebar.success("로그인됨")
+with st.sidebar:
+    st.subheader("메뉴")
+    # if st.button("로그아웃"):
+    #     st.session_state.authenticated = False
+    #     st.rerun()
+    if st.button("🔄 데이터 새로고침"):
+        st.cache_data.clear()
+        st.rerun()
+
+st.title("📅 월간 이탈률 분석 대시보드")
+
 # 데이터 로드
 df, panel_cos = load_google_sheets_data()
 
@@ -395,7 +408,3 @@ if not df.empty and panel_cos:
 else:
     st.warning("⚠️ 월간 데이터를 불러올 수 없습니다. 스프레드시트와 워크시트 이름을 확인해주세요.")
 
-# 새로고침 버튼
-if st.button("🔄 데이터 새로고침"):
-    st.cache_data.clear()
-    st.rerun()
