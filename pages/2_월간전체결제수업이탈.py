@@ -337,7 +337,6 @@ with st.sidebar:
     #     st.rerun()
     if st.button("🔄 데이터 새로고침"):
         st.cache_data.clear()
-        st.rerun()
 
 st.title("📅 월간 이탈률 분석 대시보드")
 
