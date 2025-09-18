@@ -311,7 +311,6 @@ with st.sidebar:
     #     st.rerun()
     if st.button("🔄 데이터 새로고침"):
         st.cache_data.clear()
-        st.rerun()
         
 st.title("📊 주간 이탈률 분석 대시보드")
 
@@ -379,5 +378,6 @@ else:
     selected_panel = None
     df_diff_rate = pd.DataFrame()
     df_diff_count = pd.DataFrame()
+
 
 
