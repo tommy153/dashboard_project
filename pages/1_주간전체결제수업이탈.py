@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
 
 # Google Sheets 연동 함수
 @st.cache_data(ttl=300)  # 5분 캐시
@@ -17,7 +18,7 @@ def load_google_sheets_data():
         else:
             # 로컬에서 실행 시 - credentials.json 파일 사용
             import json
-            with open('credentials.json', 'r') as f:
+            with open('./credentials.json', 'r') as f:
                 credentials_info = json.load(f)
         
         scope = ["https://spreadsheets.google.com/feeds",
@@ -26,9 +27,9 @@ def load_google_sheets_data():
         creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
         client = gspread.authorize(creds)
         
-        # 스프레드시트 열기
+        # 스프레드시트 열기 (월간 데이터 워크시트 사용)
         spreadsheet = client.open("경험그룹_KPI (수업 기준)")
-        worksheet = spreadsheet.worksheet("주간 전체신규결제수업의 구간별 이탈")
+        worksheet = spreadsheet.worksheet("월별 전체신규결제수업의 구간별 이탈")
         
         # 데이터 가져오기
         data = worksheet.get_all_records()
@@ -37,20 +38,27 @@ def load_google_sheets_data():
         for i in df.columns[3:]:
             df[f'{i}'] = df[f'{i}'].str.replace('%', '').astype(float)
 
+        # 월간 데이터 처리
         df['날짜'] = pd.to_datetime(df['시작일'])
         df['시작일'] = pd.to_datetime(df['시작일']).dt.strftime('%m-%d')
         df['종료일'] = pd.to_datetime(df['종료일']).dt.strftime('%m-%d')
-        df['주차'] = df['날짜'].dt.strftime("%W").astype(int)
+        df['월'] = df['날짜'].dt.month
         df['연도'] = df['날짜'].dt.year    
 
         panel_cos = list(df.columns[3:-3])
         # 구간
-        df = df[['연도', '주차', '시작일', '종료일', '신규 활성 수업 수'] + panel_cos]
-        st.success(f"✅ Google Sheets 데이터 로드 성공! ({len(df)}행)")
+        df = df[['연도', '월', '시작일', '종료일', '신규 활성 수업 수'] + panel_cos]
+        # 오늘 날짜 이전 주차 데이터만 필터링
+        today = datetime.now()
+        current_week = int(today.strftime("%W"))
+        current_year = today.year
+        df = df[(df['연도'] < current_year) | ((df['연도'] == current_year) & (df['주차'] < current_week))]
+
+        st.success(f"✅ Google Sheets 월간 데이터 로드 성공! ({len(df)}행)")
         return df, panel_cos
         
     except Exception as e:
-        st.error(f"❌ Google Sheets 데이터 로드 실패: {e}")
+        st.error(f"❌ Google Sheets 월간 데이터 로드 실패: {e}")
         # 새로고침 버튼
         if st.button("🔄 데이터 새로고침"):
             st.cache_data.clear()
@@ -377,6 +385,7 @@ else:
     selected_panel = None
     df_diff_rate = pd.DataFrame()
     df_diff_count = pd.DataFrame()
+
 
 
 
