@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from login import login, logout
 
 # Google Sheets 연동 함수
 @st.cache_data(ttl=300)  # 5분 캐시
@@ -378,6 +377,7 @@ else:
     selected_panel = None
     df_diff_rate = pd.DataFrame()
     df_diff_count = pd.DataFrame()
+
 
 
 
