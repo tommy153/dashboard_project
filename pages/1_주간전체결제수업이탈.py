@@ -48,12 +48,6 @@ def load_google_sheets_data():
         panel_cos = list(df.columns[3:-3])
         # 구간
         df = df[['연도', '월', '시작일', '종료일', '신규 활성 수업 수'] + panel_cos]
-        # 오늘 날짜 이전 주차 데이터만 필터링
-        today = datetime.now()
-        current_week = int(today.strftime("%W"))
-        current_year = today.year
-        df = df[(df['연도'] < current_year) | ((df['연도'] == current_year) & (df['주차'] < current_week))]
-
         st.success(f"✅ Google Sheets 월간 데이터 로드 성공! ({len(df)}행)")
         return df, panel_cos
         
@@ -66,14 +60,20 @@ def load_google_sheets_data():
         return pd.DataFrame(), []
 
 def cleansing_df(df):
+    # 오늘 날짜 이전 주차 데이터만 필터링
+    today = datetime.now()
+    current_week = int(today.strftime("%W"))
+    current_year = today.year
+    df = df[(df['연도'] < current_year) | ((df['연도'] == current_year) & (df['주차'] < current_week))]
+
     df_2024 = df[df['연도'] == 2024]
     df_2025 = df[df['연도'] == 2025]
 
     common_weeks = set(df_2024['주차']) & set(df_2025['주차'])
     max_common_week = max(common_weeks)
 
-    df_2024_common = df_2024[df_2024['주차'] < max_common_week]
-    df_2025_common = df_2025[df_2025['주차'] < max_common_week]
+    df_2024_common = df_2024[df_2024['주차'] <= max_common_week]
+    df_2025_common = df_2025[df_2025['주차'] <= max_common_week]
 
     return df_2024_common, df_2025_common
 
@@ -385,6 +385,7 @@ else:
     selected_panel = None
     df_diff_rate = pd.DataFrame()
     df_diff_count = pd.DataFrame()
+
 
 
 
