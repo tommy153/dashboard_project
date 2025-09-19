@@ -29,7 +29,7 @@ def load_google_sheets_data():
         
         # 스프레드시트 열기 (월간 데이터 워크시트 사용)
         spreadsheet = client.open("경험그룹_KPI (수업 기준)")
-        worksheet = spreadsheet.worksheet("월별 전체신규결제수업의 구간별 이탈")
+        worksheet = spreadsheet.worksheet("주간 전체신규결제수업의 구간별 이탈")
         
         # 데이터 가져오기
         data = worksheet.get_all_records()
@@ -385,6 +385,7 @@ else:
     selected_panel = None
     df_diff_rate = pd.DataFrame()
     df_diff_count = pd.DataFrame()
+
 
 
 
