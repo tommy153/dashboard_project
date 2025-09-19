@@ -12,72 +12,62 @@ from datetime import datetime
 def load_google_sheets_data():
     """Google Sheets에서 데이터 로드"""
     try:
+        # Streamlit secrets에서 인증 정보 가져오기
         if "gcp_service_account" in st.secrets:
             credentials_info = dict(st.secrets["gcp_service_account"])
         else:
+            # 로컬에서 실행 시 - credentials.json 파일 사용
             import json
             with open('./credentials.json', 'r') as f:
                 credentials_info = json.load(f)
         
         scope = ["https://spreadsheets.google.com/feeds",
-                 "https://www.googleapis.com/auth/drive"]
+                "https://www.googleapis.com/auth/drive"]
         
         creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_info, scope)
         client = gspread.authorize(creds)
         
+        # 스프레드시트 열기
         spreadsheet = client.open("경험그룹_KPI (수업 기준)")
         worksheet = spreadsheet.worksheet("주간 전체신규결제수업의 구간별 이탈")
         
+        # 데이터 가져오기
         data = worksheet.get_all_records()
         df = pd.DataFrame(data)
-
-        # % 제거 + 숫자 변환 (에러 시 NaN 처리)
+        # 컬럼명 정리
         for i in df.columns[3:]:
-            df[i] = (
-                df[i].astype(str)
-                .str.replace('%', '', regex=False)
-                .replace('-', np.nan)
-            )
-            df[i] = pd.to_numeric(df[i], errors="coerce")
+            df[f'{i}'] = df[f'{i}'].str.replace('%', '').astype(float)
 
-        # 날짜 처리
         df['날짜'] = pd.to_datetime(df['시작일'])
         df['시작일'] = pd.to_datetime(df['시작일']).dt.strftime('%m-%d')
         df['종료일'] = pd.to_datetime(df['종료일']).dt.strftime('%m-%d')
-        df['월'] = df['날짜'].dt.month
-        df['연도'] = df['날짜'].dt.year
-
-        # ✅ 주차 추가
-        df['주차'] = df['날짜'].dt.isocalendar().week
+        df['주차'] = df['날짜'].dt.strftime("%W").astype(int)
+        df['연도'] = df['날짜'].dt.year    
 
         panel_cos = list(df.columns[3:-3])
-        df = df[['연도', '월', '주차', '시작일', '종료일', '신규 활성 수업 수'] + panel_cos]
-
-        st.success(f"✅ Google Sheets 월간 데이터 로드 성공! ({len(df)}행)")
+        # 구간
+        df = df[['연도', '주차', '시작일', '종료일', '신규 활성 수업 수'] + panel_cos]
+        st.success(f"✅ Google Sheets 데이터 로드 성공! ({len(df)}행)")
+        
         return df, panel_cos
-
+        
     except Exception as e:
-        st.error(f"❌ Google Sheets 월간 데이터 로드 실패: {e}")
+        st.error(f"❌ Google Sheets 데이터 로드 실패: {e}")
+        # 새로고침 버튼
         if st.button("🔄 데이터 새로고침"):
             st.cache_data.clear()
             st.rerun()
         return pd.DataFrame(), []
 
 def cleansing_df(df):
-    # 오늘 날짜 이전 주차 데이터만 필터링
-    today = datetime.now()
-    current_week = int(today.strftime("%W"))
-    current_year = today.year
-    df = df[(df['연도'] < current_year) | ((df['연도'] == current_year) & (df['주차'] < current_week))]
-
     df_2024 = df[df['연도'] == 2024]
     df_2025 = df[df['연도'] == 2025]
 
     common_weeks = set(df_2024['주차']) & set(df_2025['주차'])
     max_common_week = max(common_weeks)
 
-    df_2024_common = df_2024[df_2024['주차'] <= max_common_week]
-    df_2025_common = df_2025[df_2025['주차'] <= max_common_week]
+    df_2024_common = df_2024[df_2024['주차'] < max_common_week]
+    df_2025_common = df_2025[df_2025['주차'] < max_common_week]
 
     return df_2024_common, df_2025_common
 
@@ -313,13 +303,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# if login():
-    # st.sidebar.success("로그인됨")
 with st.sidebar:
     st.subheader("메뉴")
-    # if st.button("로그아웃"):
-    #     st.session_state.authenticated = False
-    #     st.rerun()
+
     if st.button("🔄 데이터 새로고침"):
         st.cache_data.clear()
         
@@ -389,12 +375,5 @@ else:
     selected_panel = None
     df_diff_rate = pd.DataFrame()
     df_diff_count = pd.DataFrame()
-
-
-
-
-
-
-
 
 
