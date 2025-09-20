@@ -311,10 +311,19 @@ def viz_rate(df_year1, df_year2, selected_panel, pos, neg, df_diff_count, df_dif
         )
     )
 
-    # Y축 설정
-    fig.update_yaxes(title_text="이탈률 (%)", row=1, col=1, range=[1.5, 11])
-    fig.update_yaxes(title_text="신규 활성 수업 수", row=2, col=1)
+    # --- y축 범위 자동 계산 ---
+    # 두 데이터프레임에서 최소/최대 구하기
+    ymin = min(df_year1[selected_panel].min(), df_year2[selected_panel].min())
+    ymax = max(df_year1[selected_panel].max(), df_year2[selected_panel].max())
 
+    # 보기 좋게 여유(10% 정도) 추가
+    y_margin = (ymax - ymin) * 0.1 if ymax > ymin else 1
+    ymin_fixed = ymin - y_margin
+    ymax_fixed = ymax + y_margin
+
+    # Y축 설정 (자동 고정값 사용)
+    fig.update_yaxes(title_text="이탈률 (%)", row=1, col=1, range=[ymin_fixed, ymax_fixed])
+    fig.update_yaxes(title_text="신규 활성 수업 수", row=2, col=1)
     # X축 설정
     fig.update_xaxes(title_text="월", row=2, col=1)
 
@@ -434,4 +443,5 @@ styled_df = comparison_df.style.map(
 ).format(format_dict)
 
 st.dataframe(styled_df)
+
 
