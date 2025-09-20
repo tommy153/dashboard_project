@@ -106,7 +106,7 @@ def cal_count(df_year1, df_year2, year1, year2):
     df_diff_count['diff_count'] = df_diff_count[f'{year2}_count'] - df_diff_count[f'{year1}_count']
     return df_diff_count
 
-def viz_rate(df_year1, df_year2, selected_panel, pos, neg, df_diff_count, df_diff_rate, year1, year2):
+def viz_rate(df_year1, df_year2, selected_panel, pos, neg, df_diff_count, df_diff_rate, year1, year2, true_range):
     # 모든 데이터프레임의 길이를 맞춰주기
     min_length = min(len(df_year1), len(df_year2), len(df_diff_count), len(df_diff_rate))
 
@@ -114,6 +114,7 @@ def viz_rate(df_year1, df_year2, selected_panel, pos, neg, df_diff_count, df_dif
     df_year2 = df_year2.head(min_length).reset_index(drop=True)
     df_diff_count = df_diff_count.head(min_length).reset_index(drop=True)
     df_diff_rate = df_diff_rate.head(min_length).reset_index(drop=True)
+
     # 서브플롯 생성 (2행 1열, 높이 비율 3:1)
     fig = make_subplots(
         rows=2, cols=1,
@@ -124,6 +125,27 @@ def viz_rate(df_year1, df_year2, selected_panel, pos, neg, df_diff_count, df_dif
     )
 
     fig.update_layout(template="seaborn")
+
+    # 신뢰도가 낮은 구간 배경색 추가
+    if selected_panel in true_range:
+        range_weeks = abs(true_range[selected_panel])  # 음수를 양수로 변환
+
+        # 데이터의 마지막 주차들 구하기
+        max_week = df_year2['주차'].max() if not df_year2.empty else df_year1['주차'].max()
+        min_week = df_year2['주차'].min() if not df_year2.empty else df_year1['주차'].min()
+
+        # 신뢰도 낮은 구간 계산 (마지막 N주)
+        if range_weeks > 0:
+            cutoff_week = max_week - range_weeks + 1  # +1은 경계 포함을 위해
+            if cutoff_week <= max_week:
+                fig.add_vrect(
+                    x0=max(cutoff_week, min_week), x1=max_week + 0.5,
+                    fillcolor="red", opacity=0.1,
+                    layer="below", line_width=0,
+                    annotation_text=f"신뢰도 낮음 ({range_weeks}주)",
+                    annotation_position="top left",
+                    row=1, col=1
+                )
 
     # 첫 번째 서브플롯: 이탈률 라인 차트
     # 지난년도 데이터
@@ -242,6 +264,29 @@ def viz_rate(df_year1, df_year2, selected_panel, pos, neg, df_diff_count, df_dif
         ),
         row=1, col=1
     )
+    
+        # 신뢰도가 낮은 구간 배경색 추가
+    if selected_panel in true_range:
+        range_weeks = abs(true_range[selected_panel])  # -2 → 2로 변환
+
+        # 이번년도 데이터 기준 마지막 주차
+        max_week = df_year2['주차'].max() if not df_year2.empty else df_year1['주차'].max()
+
+        # 마지막 N주 구간 (예: -2 → 마지막 2주)
+        cutoff_week = max_week - range_weeks + 1  # 경계 포함
+
+        fig.add_vrect(
+            x0=cutoff_week, 
+            x1=max_week + 0.5,   # 마지막 구간 살짝 오른쪽까지
+            fillcolor="red", 
+            opacity=0.1,
+            layer="below", 
+            line_width=0,
+            annotation_text=f"신뢰도 낮음 ({range_weeks}주)", 
+            annotation_position="top left",
+            row=1, col=1
+        )
+
 
     # 두 번째 서브플롯: 신규 활성 수업 수 바 차트
     # 지난년도 바
@@ -324,6 +369,41 @@ def viz_rate(df_year1, df_year2, selected_panel, pos, neg, df_diff_count, df_dif
 
     return fig
 
+# 데이터 신뢰 구간
+true_range = {
+    # 즉시 확인 가능 (1-2주)
+    '결제': -2,
+    '과외신청서': -2,
+
+    # 매칭 단계 (2-3주)
+    '1. 결제 직후 매칭 전': -2,
+    '2. 매칭 직후 첫 수업 전': -3,
+    '결제 직후 ~ 첫 수업 전': -3,
+
+    # 수업 초기 단계 (3-6주)
+    '3. 첫 수업 후 2회차 수업 전': -4,
+
+    # 1개월 완주 단계 (6-8주)
+    '4. 2회차 수업 후 DM 1.0 이하': -6,
+    '매칭 직후 DM 1.0 이하': -6,
+    '첫 수업 후 DM 1.0 이하': -6,
+    '5. DM 1 총 이탈': -6,
+
+    # 3개월 완주 단계 (12-16주)
+    'DM 3 총 이탈': -14,
+
+    # 4개월+ 장기 단계 (16-20주)
+    'DM 4 총 이탈 (4미만)': -18,
+    '단골 전환 4개월 이상': -18,
+
+    # 월별 구간 지표들
+    '1개월 초과 2개월 이하': -8,      # 2개월 확인하려면 8주 필요
+    '2개월 초과 3개월 이하': -14,     # 3개월 확인하려면 14주 필요
+    '3개월 초과 4개월 이하': -18,     # 4개월 확인하려면 18주 필요
+    '1개월 초과 4개월 미만': -18,     # 4개월 미만이므로 18주
+}
+
+
 # 페이지 설정
 st.set_page_config(
     page_title="주간 이탈률 분석 대시보드",
@@ -380,7 +460,7 @@ neg = df_diff_rate[df_diff_rate["diff_pp"] < 0]
 
  # 시각화 생성
 st.subheader(f"📈 {selected_panel} 이탈률 분석")
-fig = viz_rate(df_year1, df_year2, selected_panel, pos, neg, df_diff_count, df_diff_rate, year1, year2)
+fig = viz_rate(df_year1, df_year2, selected_panel, pos, neg, df_diff_count, df_diff_rate, year1, year2, true_range)
 st.plotly_chart(fig)
 
 # 테이블 (지난연도 vs 이번연도 비교)
@@ -435,3 +515,4 @@ styled_df = comparison_df.style.applymap(
 ).format(format_dict)
 
 st.dataframe(styled_df)
+
