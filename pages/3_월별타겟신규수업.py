@@ -428,9 +428,10 @@ for col in comparison_df.columns:
         format_dict[col] = '{:.2f}'
 
 # 스타일이 적용된 데이터프레임 표시
-styled_df = comparison_df.style.applymap(
+styled_df = comparison_df.style.map(
     color_diff_column,
     subset=['차이(p.p.)']
 ).format(format_dict)
 
 st.dataframe(styled_df)
+
