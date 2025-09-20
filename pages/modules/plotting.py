@@ -176,7 +176,7 @@ def viz_rate_week(
         max_week = df_year2['주차'].max() if not df_year2.empty else df_year1['주차'].max()
 
         # 마지막 N주 구간 (예: -2 → 마지막 2주)
-        cutoff_week = max_week - range_weeks + 1  # 경계 포함
+        cutoff_week = max_week - range_weeks + 0.5  # 경계 포함
 
         fig.add_vrect(
             x0=cutoff_week, 
@@ -435,7 +435,7 @@ def viz_rate_month(
 
         # 신뢰도 낮은 구간 계산 (마지막 N개월)
         if range_months > 0:
-            cutoff_month = max_month - range_months + 1  # +1은 경계 포함을 위해
+            cutoff_month = max_month - range_months + 0.5  # +1은 경계 포함을 위해
             if cutoff_month <= max_month:
                 fig.add_vrect(
                     x0=max(cutoff_month, min_month), 
