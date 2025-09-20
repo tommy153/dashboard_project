@@ -8,7 +8,13 @@ from modules.metric import cal_rate, cal_count
 from modules.plotting import viz_rate_week, style_comparison_table
 
 # Google Sheets 연동 함수
-df, panel_cos = load_google_sheets_data(worksheet="대시보드용_주별전체신규수업", week=True)
+if "data_week_all" not in st.session_state:
+    df, panel_cos = load_google_sheets_data(
+        worksheet="대시보드용_주별전체신규수업", week=True
+    )
+    st.session_state["data_week_all"] = (df, panel_cos)
+else:
+    df, panel_cos = st.session_state["data_week_all"]
 
 with open("./true_range.json", "r", encoding="utf-8") as f:
     true_range = json.load(f)
@@ -72,4 +78,5 @@ df_year2_reset = df_year2.reset_index(drop=True)
 df_diff_rate_reset = df_diff_rate.reset_index(drop=True)
 
 styled_df = style_comparison_table(df_year1_reset, df_year2_reset, df_diff_rate_reset, year1, year2, selected_panel)
+
 st.dataframe(styled_df)
