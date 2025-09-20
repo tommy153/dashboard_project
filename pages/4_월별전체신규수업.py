@@ -409,4 +409,28 @@ comparison_df[f'{year2}_{selected_panel}'] = df_year2_reset[selected_panel]
 # 차이 계산
 comparison_df['차이(p.p.)'] = df_diff_rate_reset['diff_pp']
 
-st.dataframe(comparison_df)
+# 스타일 함수 정의
+def color_diff_column(val):
+    """차이(p.p.) 컬럼에 조건부 색상 적용"""
+    if pd.isna(val):
+        return ''
+    elif val > 0:
+        return 'color: #d32f2f'  # 빨간색 (악화)
+    elif val < 0:
+        return 'color: #2e7d32'  # 초록색 (개선)
+    else:
+        return ''
+
+# 모든 숫자 컬럼에 포맷 적용
+format_dict = {}
+for col in comparison_df.columns:
+    if comparison_df[col].dtype in ['float64', 'int64'] and '수업수' not in col:
+        format_dict[col] = '{:.2f}'
+
+# 스타일이 적용된 데이터프레임 표시
+styled_df = comparison_df.style.applymap(
+    color_diff_column,
+    subset=['차이(p.p.)']
+).format(format_dict)
+
+st.dataframe(styled_df)
