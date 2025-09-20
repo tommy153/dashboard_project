@@ -1,6 +1,4 @@
 import streamlit as st
-import plotly.graph_objects as go
-import pandas as pd
 
 # 페이지 설정
 st.set_page_config(
@@ -41,10 +39,6 @@ with analysis_col1:
     **Weekly Analysis**
     
     주간 단위로 이탈률 데이터를 분석합니다.
-    - 주차별 트렌드 분석
-    - 2024-2025년 비교
-    - 구간별 세부 분석
-    - 신규 활성 수업 수 추적
     """)
 
 with analysis_col2:
@@ -53,10 +47,6 @@ with analysis_col2:
     **Monthly Analysis**
     
     월간 단위로 이탈률 데이터를 분석합니다.
-    - 월별 트렌드 분석  
-    - 장기적 패턴 파악
-    - 계절성 분석
-    - 종합적 성과 평가
     """)
 
 # 사용 가이드 섹션
@@ -69,10 +59,8 @@ st.markdown("""
 3. **차트**를 통해 2024년과 2025년 데이터를 비교 분석하세요
 4. **호버 정보**를 통해 상세한 데이터를 확인하세요
 5. **테이블**에서 정확한 수치를 확인하세요
-6. 🔄 **새로고침 버튼**으로 최신 데이터를 불러오세요 -> 데이터 연동 개발중..
-7. 구간 선택시 그래프가 이상하게 나온다면
+6. 🔄 **새로고침 버튼**으로 최신 데이터를 불러오세요
 """)
-st.image("image.png", width=800)
 
 st.markdown("""
 ### 💡 분석 Tips
