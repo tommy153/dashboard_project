@@ -9,7 +9,13 @@ from modules.plotting import viz_rate_week, style_comparison_table
 from modules.genai import full_data_report
 
 # Google Sheets 연동 함수
-df, panel_cos = load_google_sheets_data(worksheet="대시보드용_주별타겟신규수업", week=True)
+if "data_week_target" not in st.session_state:
+    df, panel_cos = load_google_sheets_data(
+        worksheet="대시보드용_주별타겟신규수업", week=True
+    )
+    st.session_state["data_week_target"] = (df, panel_cos)
+else:
+    df, panel_cos = st.session_state["data_week_target"]
 
 with open("./true_range.json", "r", encoding="utf-8") as f:
     true_range = json.load(f)
@@ -116,4 +122,5 @@ if hasattr(st.session_state, 'report_content') and st.session_state.report_conte
         data=st.session_state.report_content,
         file_name=f"이탈률_분석_보고서_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md",
         mime="text/markdown"
+
     )
