@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 # Google Sheets 연동 함수
@@ -357,8 +357,18 @@ def viz_rate(df_year1, df_year2, selected_panel, pos, neg, df_diff_count, df_dif
         )
     )
 
-    # Y축 설정
-    fig.update_yaxes(title_text="이탈률 (%)", row=1, col=1, range=[1.5, 11])
+    # --- y축 범위 자동 계산 ---
+    # 두 데이터프레임에서 최소/최대 구하기
+    ymin = min(df_year1[selected_panel].min(), df_year2[selected_panel].min())
+    ymax = max(df_year1[selected_panel].max(), df_year2[selected_panel].max())
+
+    # 보기 좋게 여유(10% 정도) 추가
+    y_margin = (ymax - ymin) * 0.1 if ymax > ymin else 1
+    ymin_fixed = ymin - y_margin
+    ymax_fixed = ymax + y_margin
+
+    # Y축 설정 (자동 고정값 사용)
+    fig.update_yaxes(title_text="이탈률 (%)", row=1, col=1, range=[ymin_fixed, ymax_fixed])
     fig.update_yaxes(title_text="신규 활성 수업 수", row=2, col=1)
 
     # X축 설정
@@ -402,7 +412,6 @@ true_range = {
     '3개월 초과 4개월 이하': -18,     # 4개월 확인하려면 18주 필요
     '1개월 초과 4개월 미만': -18,     # 4개월 미만이므로 18주
 }
-
 
 # 페이지 설정
 st.set_page_config(
@@ -509,10 +518,9 @@ for col in comparison_df.columns:
         format_dict[col] = '{:.2f}'
 
 # 스타일이 적용된 데이터프레임 표시
-styled_df = comparison_df.style.applymap(
+styled_df = comparison_df.style.map(
     color_diff_column,
     subset=['차이(p.p.)']
 ).format(format_dict)
 
 st.dataframe(styled_df)
-
