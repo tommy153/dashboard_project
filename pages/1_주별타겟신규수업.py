@@ -113,7 +113,7 @@ if hasattr(st.session_state, 'generate_report') and st.session_state.generate_re
 
 # 보고서 표시 (생성된 내용이 있으면 계속 표시)
 if hasattr(st.session_state, 'report_content') and st.session_state.report_content:
-    st.subheader("📄 전체 데이터 종합 보고서")
+    st.subheader("📄 주별 타겟 신규수업 데이터 종합 보고서")
     st.markdown(st.session_state.report_content)
 
     # 다운로드 버튼
@@ -124,3 +124,4 @@ if hasattr(st.session_state, 'report_content') and st.session_state.report_conte
         mime="text/markdown"
 
     )
+
