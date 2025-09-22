@@ -68,8 +68,11 @@ df_diff_count = cal_count(df_year1, df_year2, year1, year2)
 pos = df_diff_rate[df_diff_rate["diff_pp"] >= 0]
 neg = df_diff_rate[df_diff_rate["diff_pp"] < 0]
 
- # 시각화 생성
-st.subheader(f"📈 {selected_panel} 월별 이탈률 분석")
+# 시각화 생성
+if selected_panel == '단골 전환 4개월 이상':
+    st.subheader(f"📈 {selected_panel} 분석")
+else:
+    st.subheader(f"📈 {selected_panel} 이탈률 분석")
 fig = viz_rate_month(df_year1, df_year2, selected_panel, pos, neg, df_diff_count, df_diff_rate, year1, year2, true_range)
 st.plotly_chart(fig)
 
@@ -82,3 +85,4 @@ df_diff_rate_reset = df_diff_rate.reset_index(drop=True)
 styled_df = style_comparison_table(df_year1_reset, df_year2_reset, df_diff_rate_reset, year1, year2, selected_panel, week=False)
 
 st.dataframe(styled_df)
+
