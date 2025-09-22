@@ -246,12 +246,20 @@ def viz_rate_week(
     )
 
     # 레이아웃 설정
-    fig.update_layout(
-        title_text=f"{selected_panel} 이탈률 분석",
-        showlegend=True,
-        height=800,
-        width=1400
-    )
+    if selected_panel == "단골 전환 4개월 이상":
+        fig.update_layout(
+            title_text=f"{selected_panel} 이탈률 분석",
+            showlegend=True,
+            height=800,
+            width=1400
+        )
+    else:
+        fig.update_layout(
+            title_text=f"{selected_panel} 이탈률 분석",
+            showlegend=True,
+            height=800,
+            width=1400
+        )
 
     fig.update_traces(
         hoverlabel=dict(
@@ -528,7 +536,10 @@ def viz_rate_month(
     ymax_fixed = ymax + y_margin
 
     # Y축 설정 (자동 고정값 사용)
-    fig.update_yaxes(title_text="이탈률 (%)", row=1, col=1, range=[ymin_fixed, ymax_fixed])
+    if selected_panel == "단골 전환 4개월 이상":
+        fig.update_yaxes(title_text="전환율 (%)", row=1, col=1, range=[ymin_fixed, ymax_fixed])
+    else: 
+        fig.update_yaxes(title_text="이탈률 (%)", row=1, col=1, range=[ymin_fixed, ymax_fixed])
     fig.update_yaxes(title_text="신규 활성 수업 수", row=2, col=1)
 
     # X축 설정
