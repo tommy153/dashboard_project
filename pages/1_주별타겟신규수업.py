@@ -98,7 +98,7 @@ st.markdown("---")
 st.header("🤖 AI 보고서 생성")
 
 with st.sidebar:
-    if st.button("📑 보고서 출력", type="primary"):
+    if st.button("📑 보고서 출력(Demo)", type="primary"):
         st.session_state.generate_report = True
         st.session_state.report_content = None  # 새로 생성할 때 기존 내용 초기화
 
@@ -109,7 +109,7 @@ if hasattr(st.session_state, 'generate_report') and st.session_state.generate_re
             try:
                 full_report = full_data_report(df)
                 st.session_state.report_content = full_report  # 보고서 내용 저장
-                st.success("보고서 생성 완료!")
+                st.success("보고서 생성 완료!(Demo)")
             except Exception as e:
                 st.error(f"보고서 생성 중 오류가 발생했습니다: {e}")
                 st.session_state.generate_report = False
@@ -127,5 +127,6 @@ if hasattr(st.session_state, 'report_content') and st.session_state.report_conte
         mime="text/markdown"
 
     )
+
 
 
