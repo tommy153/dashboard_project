@@ -69,8 +69,11 @@ df_diff_count = cal_count(df_year1, df_year2, year1, year2)
 pos = df_diff_rate[df_diff_rate["diff_pp"] >= 0]
 neg = df_diff_rate[df_diff_rate["diff_pp"] < 0]
 
- # 시각화 생성
-st.subheader(f"📈 {selected_panel} 이탈률 분석")
+# 시각화 생성
+if selected_panel == '단골 전환 4개월 이상':
+    st.subheader(f"📈 {selected_panel} 분석")
+else:
+    st.subheader(f"📈 {selected_panel} 이탈률 분석")
 fig = viz_rate_week(
     df_year1, df_year2, 
     selected_panel, 
@@ -124,4 +127,5 @@ if hasattr(st.session_state, 'report_content') and st.session_state.report_conte
         mime="text/markdown"
 
     )
+
 
