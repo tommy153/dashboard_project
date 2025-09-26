@@ -1,3 +1,21 @@
+# 보안
 .gitignore
 Dockerfile
+.streamlit/
+
+# 가상환경
+venv/
+.env
+
+# 캐시/빌드 파일
+__pycache__/
+*.pyc
+build/
+dist/
+
+# IDE 설정
+.vscode/
+.idea/
+
+# 보안
 .streamlit/
